@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends
 from typing import Any, Dict, Optional, Union
 
-from fastapi import Body, Path, Query
+from fastapi import Body, Path, Query, Response, status
 from pydantic import BaseModel, Field, StrictStr
 
 from iceberg_rest.catalog import get_catalog
 from iceberg_rest.exception import IcebergHTTPException
-from pyiceberg.table import TableIdentifier
+from pyiceberg.io import load_file_io
+from pyiceberg.table import Table, TableIdentifier
 from pyiceberg.table.metadata import TableMetadata
 from pyiceberg.exceptions import (
     TableAlreadyExistsError,
@@ -446,11 +447,16 @@ def update_table(
 ) -> CommitTableResponse:
     """Commit updates to a table.  Commits have two parts, requirements and updates. Requirements are assertions that will be validated before attempting to make and commit changes. For example, &#x60;assert-ref-snapshot-id&#x60; will check that a named ref&#39;s snapshot ID has a certain value.  Updates are changes to make to table metadata. For example, after asserting that the current main ref is at the expected snapshot, a commit may add a new child snapshot and set the ref to the new snapshot id.  Create table transactions that are started by createTable with &#x60;stage-create&#x60; set to true are committed using this route. Transactions should include all changes to the table, including table initialization, like AddSchemaUpdate and SetCurrentSchemaUpdate. The &#x60;assert-create&#x60; requirement is used to ensure that the table was not created concurrently."""
     try:
-        if commit_table_request.identifier is None:
-            commit_table_request.identifier = TableIdentifier(
-                namespace=[namespace], name=table
-            )
-        resp = catalog._commit_table(commit_table_request)
+        identifier = (namespace, table)
+        tbl = Table(
+            identifier=identifier,
+            metadata=catalog._empty_table_metadata(),
+            metadata_location="",
+            io=load_file_io(),
+            catalog=catalog,
+        )
+        # (TODO): `commit_table` should just take in the identifier instead of table
+        resp = catalog.commit_table(tbl, commit_table_request.requirements, commit_table_request.updates)
     except NoSuchTableError:
         raise IcebergHTTPException(
             status_code=404, detail=f"Table does not exist: {(namespace, table)}"
@@ -503,7 +509,10 @@ def table_exists(
 ) -> None:
     """Check if a table exists within a given namespace. The response does not contain a body."""
     try:
-        catalog.load_table(identifier=(namespace, table))
+        identifier = (namespace, table)
+        catalog.load_table(identifier)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
     except NoSuchTableError:
         raise IcebergHTTPException(
             status_code=404, detail=f"Table does not exist: {(namespace, table)}"
