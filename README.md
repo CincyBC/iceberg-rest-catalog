@@ -9,7 +9,7 @@ Pythonic Iceberg REST Catalog
 ```
 docker build . \
 --target=prod \
---build-arg BASE_IMAGE=python:3.11-slim \
+--build-arg BASE_IMAGE=python:3.12-slim \
 -t iceberg-rest-base
 ```
 
@@ -19,7 +19,7 @@ docker build . \
 docker build . \
 --target=prod \
 --build-arg EXTRAS=postgres \
---build-arg BASE_IMAGE=python:3.11-slim \
+--build-arg BASE_IMAGE=python:3.12-slim \
 -t iceberg-rest-postgres
 ```
 
@@ -29,7 +29,7 @@ docker build . \
 docker build . \
 --target=prod \
 --build-arg EXTRAS=mysql \
---build-arg BASE_IMAGE=python:3.11 \
+--build-arg BASE_IMAGE=python:3.12 \
 -t iceberg-rest-mysql
 ```
 
@@ -39,7 +39,7 @@ docker build . \
 docker build . \
 --target=prod \
 --build-arg EXTRAS='postgres mysql' \
---build-arg BASE_IMAGE=python:3.11 \
+--build-arg BASE_IMAGE=python:3.12 \
 -t iceberg-rest-full
 ```
 
@@ -48,7 +48,7 @@ docker build . \
 ```
 docker build . \
 --target=dev \
---build-arg BASE_IMAGE=python:3.11 \
+--build-arg BASE_IMAGE=python:3.12 \
 -t iceberg-rest-dev
 ```
 

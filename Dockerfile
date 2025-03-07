@@ -1,6 +1,6 @@
 ########################################################################################
 
-ARG BASE_IMAGE=python:3.11
+ARG BASE_IMAGE=python:3.12
 FROM ${BASE_IMAGE} AS runtime-base
 WORKDIR /home/iceberg/iceberg_rest
 
@@ -25,8 +25,7 @@ RUN mkdir -p /tmp/warehouse && \
 
 FROM runtime-base AS build-base
 
-ARG POETRY_VERSION=1.8.3
-ARG POETRY_HOME="/opt/poetry"
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Use bash shell
 SHELL ["/bin/bash", "-c"]
@@ -42,34 +41,24 @@ RUN apt-get update \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry - respects $POETRY_VERSION & $POETRY_HOME
-ENV POETRY_HOME=${POETRY_HOME} \
-    POETRY_VERSION=${POETRY_VERSION}
-RUN curl -sSL https://install.python-poetry.org/ | python3
-
-# Add Poetry to the path
-ENV PATH="$POETRY_HOME/bin:$PATH"
-
-# Copy in the submodules
-COPY vendor/ vendor/
 
 # Copy in the config files
-COPY pyproject.toml poetry.lock poetry.toml .gitmodules ./
+COPY pyproject.toml uv.lock .gitmodules ./
 
 ########################################################################################
 
 FROM build-base AS build-prod
 ARG EXTRAS=base
-
+WORKDIR /home/iceberg/iceberg_rest
 # Install the dependencies first so they are cached
-RUN poetry install --no-root --extras "${EXTRAS}"
+RUN uv sync --no-dev --frozen --no-cache --group ${EXTRAS}
 
 ########################################################################################
 
 FROM build-base AS build-dev
-
+WORKDIR /home/iceberg/iceberg_rest
 # Install the dependencies first so they are cached
-RUN poetry install --no-root --with dev --all-extras
+RUN uv sync --frozen --all-groups
 
 ########################################################################################
 
@@ -90,12 +79,8 @@ COPY pyproject.toml ./
 COPY src/ src/
 COPY README.md README.md
 
-# Install the source package
-RUN pip install . --no-deps
-
 # Serve the app in production mode
-CMD ["uvicorn", "src.iceberg_rest.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
+CMD ["/home/iceberg/iceberg_rest/.venv/bin/uvicorn", "src.iceberg_rest.main:app", "--host",  "0.0.0.0", "--port", "8000"]
 # Healthcheck
 HEALTHCHECK --interval=5m --timeout=30s --start-period=30s --retries=5 \
     CMD curl -f  http://localhost:8000/v1/config || exit 1
@@ -130,10 +115,7 @@ COPY src/ src/
 COPY tests/ tests/
 COPY README.md README.md
 
-# Install the source package
-RUN pip install . --no-deps
-
 # Serve the app in development mode
-CMD ["uvicorn", "src.iceberg_rest.main:app", "--host",  "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["/home/iceberg/iceberg_rest/.venv/bin/uvicorn", "src.iceberg_rest.main:app", "--host",  "0.0.0.0", "--port", "8000", "--reload"]
 
 ########################################################################################
