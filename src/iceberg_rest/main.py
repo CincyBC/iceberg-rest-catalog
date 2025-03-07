@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
-from iceberg_rest.api.catalog_api import router as CatalogApiRouter
-from iceberg_rest.exception import IcebergHTTPException, iceberg_http_exception_handler
+from src.iceberg_rest.api.catalog_api import router as CatalogApiRouter
+from src.iceberg_rest.exception import IcebergHTTPException, iceberg_http_exception_handler
 
 
 def create_app():

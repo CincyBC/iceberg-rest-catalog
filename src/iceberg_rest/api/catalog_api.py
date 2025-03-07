@@ -4,8 +4,8 @@ from typing import Any, Dict, Optional, Union
 from fastapi import Body, Path, Query, Response, status
 from pydantic import BaseModel, Field, StrictStr
 
-from iceberg_rest.catalog import get_catalog
-from iceberg_rest.exception import IcebergHTTPException
+from src.iceberg_rest.catalog import get_catalog
+from src.iceberg_rest.exception import IcebergHTTPException
 from pyiceberg.io import load_file_io
 from pyiceberg.table import Table, TableIdentifier
 from pyiceberg.table.metadata import TableMetadata
@@ -20,8 +20,8 @@ from pyiceberg.exceptions import (
 from pyiceberg.table.sorting import UNSORTED_SORT_ORDER
 from pyiceberg.typedef import Identifier
 
-from iceberg_rest.models.config import CatalogConfig
-from iceberg_rest.models.request import (
+from src.iceberg_rest.models.config import CatalogConfig
+from src.iceberg_rest.models.request import (
     CommitTableRequest,
     CommitTransactionRequest,
     CreateNamespaceRequest,
@@ -30,7 +30,7 @@ from iceberg_rest.models.request import (
     RenameTableRequest,
     UpdateNamespacePropertiesRequest,
 )
-from iceberg_rest.models.response import (
+from src.iceberg_rest.models.response import (
     CommitTableResponse,
     CreateNamespaceResponse,
     GetNamespaceResponse,
@@ -456,7 +456,9 @@ def update_table(
             catalog=catalog,
         )
         # (TODO): `commit_table` should just take in the identifier instead of table
-        resp = catalog.commit_table(tbl, commit_table_request.requirements, commit_table_request.updates)
+        resp = catalog.commit_table(
+            tbl, commit_table_request.requirements, commit_table_request.updates
+        )
     except NoSuchTableError:
         raise IcebergHTTPException(
             status_code=404, detail=f"Table does not exist: {(namespace, table)}"

@@ -1,4 +1,4 @@
-from iceberg_rest.settings import settings
+from src.iceberg_rest.settings import settings
 from pyiceberg.catalog.sql import SqlCatalog
 
 
