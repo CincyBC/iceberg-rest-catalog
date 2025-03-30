@@ -524,7 +524,7 @@ def test_commit_table(catalog: Catalog) -> None:
                 schema=new_schema, last_column_id=new_schema.highest_field_id
             ),
             SetCurrentSchemaUpdate(schema_id=-1),
-        ]
+        ],
     )
 
     # Then
