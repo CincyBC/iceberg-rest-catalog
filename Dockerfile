@@ -73,7 +73,7 @@ RUN chown -R iceberg:iceberg /home/iceberg/iceberg_rest
 
 # Switch to iceberg user
 USER iceberg
-
+ENV AWS_SSL_NO_VERIFY=true
 # Add the source code
 COPY pyproject.toml ./
 COPY src/ src/
