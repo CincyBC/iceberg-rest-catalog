@@ -51,6 +51,7 @@ FROM build-base AS build-prod
 ARG EXTRAS=base
 WORKDIR /home/iceberg/iceberg_rest
 # Install the dependencies first so they are cached
+ENV AWS_CLI_VERIFY_SSL=false
 RUN uv sync --no-dev --frozen --no-cache --group ${EXTRAS}
 
 ########################################################################################
@@ -74,6 +75,7 @@ RUN chown -R iceberg:iceberg /home/iceberg/iceberg_rest
 # Switch to iceberg user
 USER iceberg
 ENV AWS_SSL_NO_VERIFY=true
+ENV AWS_CLI_VERIFY_SSL=false
 # Add the source code
 COPY pyproject.toml ./
 COPY src/ src/
