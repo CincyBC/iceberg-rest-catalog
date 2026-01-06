@@ -20,7 +20,10 @@ def _create_catalog():
             "s3.endpoint": settings.CATALOG_S3_ENDPOINT,
             "s3.access-key-id": settings.AWS_ACCESS_KEY_ID,
             "s3.secret-access-key": settings.AWS_SECRET_ACCESS_KEY,
-            "client.verify-ssl": "false",
+            # Use s3fs instead of PyArrow's native S3 (which uses libcurl and ignores Python SSL settings)
+            "py-io-impl": "pyiceberg.io.fsspec.FsspecFileIO",
+            # s3fs client kwargs for SSL bypass in development
+            "s3.client-kwargs": '{"verify": false}',
         },
     )
     return catalog
