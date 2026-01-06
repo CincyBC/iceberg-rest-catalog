@@ -21,6 +21,8 @@ def _create_catalog():
             "s3.access-key-id": settings.AWS_ACCESS_KEY_ID,
             "s3.secret-access-key": settings.AWS_SECRET_ACCESS_KEY,
             "s3.verify-ssl": "false",
+            "py-io-impl": "pyiceberg.io.fsspec.FsspecFileIO",
+            "s3fs.client_kwargs": '{"verify": false}',
         },
     )
     return catalog
