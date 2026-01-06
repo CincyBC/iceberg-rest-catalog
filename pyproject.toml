@@ -5,7 +5,7 @@ description = "An Apache Iceberg REST Catalog implementation in Python."
 authors = ["Kevin Liu <kevinjqliu@users.noreply.github.com>", "GoldToothRichards <crabtr26@proton.me>"]
 readme = "README.md"
 packages = [{ include = "iceberg_rest", from = "src" }]
-requires-python = ">=3.12"
+requires-python = "==3.12.*"
 dependencies = [
     "fastapi>=0.115.11",
     "pandas>=2.2.3",
