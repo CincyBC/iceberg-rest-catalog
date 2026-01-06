@@ -74,8 +74,12 @@ RUN chown -R iceberg:iceberg /home/iceberg/iceberg_rest
 
 # Switch to iceberg user
 USER iceberg
+# Disable SSL verification for development environments with self-signed certificates
 ENV AWS_SSL_NO_VERIFY=true
 ENV AWS_CLI_VERIFY_SSL=false
+ENV PYTHONHTTPSVERIFY=0
+ENV CURL_CA_BUNDLE=""
+ENV REQUESTS_CA_BUNDLE=""
 # Add the source code
 COPY pyproject.toml ./
 COPY src/ src/

@@ -20,6 +20,7 @@ def _create_catalog():
             "s3.endpoint": settings.CATALOG_S3_ENDPOINT,
             "s3.access-key-id": settings.AWS_ACCESS_KEY_ID,
             "s3.secret-access-key": settings.AWS_SECRET_ACCESS_KEY,
+            "client.verify-ssl": "false",
         },
     )
     return catalog
